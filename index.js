@@ -1,32 +1,75 @@
 #!/usr/bin/env node
-
-require("dotenv").config();
-
 const program = require("commander");
 const binanceApi = require("node-binance-api");
-const chalk = require("chalk");
+
 const log = console.log;
 const table = console.table;
 
-const binance = new binanceApi().options({
-  APIKEY: process.env.BINANCE_APIKEY,
-  APISECRET: process.env.BINANCE_APISECRET,
-});
+const env = require("path").join(require("os").homedir(), ".crypto_cli_env");
 
-const currentOpenPositions = require("./utils/binance/currentOpenPositions");
+const b_init = require("./utils/binance/init");
 
-(async () => {
-  let binanceOpenPositions = await currentOpenPositions(binance);
+if (b_init(env)) {
+  const binance_position = require("./utils/binance/position");
+  const binance_balance = require("./utils/binance/balance");
+  const binance_orders = require("./utils/binance/orders");
 
-  table(binanceOpenPositions);
+  const binance = new binanceApi().options({
+    APIKEY: process.env.CRYPTO_CLI_BINANCE_API_KEY,
+    APISECRET: process.env.CRYPTO_CLI_BINANCE_API_SECRET,
+  });
 
-  // let ticker = await binance.prices();
+  program.version("0.0.1").description("Crypto CLI");
 
-  // table(ticker.BNBUSDT);
+  program
+    .command("b_position")
+    .description("Binance Position")
+    .action(() => {
+      const position = binance_position(binance);
 
-  // console.info(`Price of BNB: ${ticker.BNBUSDT}`);
+      position.then((data) => {
+        table(data, [
+          "SYMBOL",
+          "POSITION_AMOUNT",
+          "ENTRY_PRICE",
+          "MARK_PRICE",
+          "UNREALIZED_PNL",
+          "LIQUIDATION_PRICE",
+          "LEVERAGE",
+          "MARGIN_TYPE",
+          "NOTIONAL",
+          "ENTRY_AT",
+        ]);
+      });
+    });
 
-  // console.info(await binance.futuresExchangeInfo());
+  program
+    .command("b_orders")
+    .description("Binance Orders")
+    .action(() => {
+      const orders = binance_orders(binance);
 
-  // console.info(await binance.futuresQuote("BTCUSDT"));
-})();
+      orders.then((data) => {
+        table(data);
+      });
+    });
+
+  program
+    .command("b_balance")
+    .description("Binance Balance")
+    .action(() => {
+      const balance = binance_balance(binance);
+      balance.then((data) => {
+        table(data);
+      });
+    });
+
+  program
+    .command("stream <symbol>")
+    .description("Stream")
+    .action((symbol) => {
+      binance.futuresMiniTickerStream(s);
+    });
+
+  program.parse(process.argv);
+}
