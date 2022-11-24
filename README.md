@@ -23,5 +23,7 @@ Interact binance API via CLI.
 ## Donate
 
 BTC - `bc1qwsdyxa95taclxmjkfdvv9zfdt287z94cyp25h7`
+
 ETH - `0x3a6d3eF464E4dd857c491ec5fbd54E9C80339F8a`
+
 BNB - `0x3a6d3eF464E4dd857c491ec5fbd54E9C80339F8a`
