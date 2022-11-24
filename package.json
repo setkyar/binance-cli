@@ -1,7 +1,7 @@
 {
-  "name": "crypto-cli",
+  "name": "binance-cli",
   "version": "1.0.0",
-  "description": "Crypto CLI",
+  "description": "Binance CLI",
   "main": "index.js",
   "dependencies": {
     "agent-base": "^4.3.0",

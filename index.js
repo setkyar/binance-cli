@@ -10,9 +10,11 @@ const env = require("path").join(require("os").homedir(), ".crypto_cli_env");
 const b_init = require("./utils/binance/init");
 
 if (b_init(env)) {
+  const future_market = require("./utils/binance/future_market");
   const binance_position = require("./utils/binance/position");
   const binance_balance = require("./utils/binance/balance");
   const binance_orders = require("./utils/binance/orders");
+  const binance_deposit_history = require("./utils/binance/deposit_history");
 
   const binance = new binanceApi().options({
     APIKEY: process.env.CRYPTO_CLI_BINANCE_API_KEY,
@@ -22,12 +24,31 @@ if (b_init(env)) {
   program.version("0.0.1").description("Crypto CLI");
 
   program
-    .command("b_position")
+    .command("future_market")
+    .alias("fm")
+    .description("Get future market data")
+    .action(async () => {
+      const market = await future_market(binance);
+
+      console.log(market);
+      table(market);
+    });
+
+
+  program
+    .command("position")
+    .alias("p")
     .description("Binance Position")
     .action(() => {
       const position = binance_position(binance);
 
       position.then((data) => {
+
+        if (data.length <= 0) {
+          log("No opending position found!");
+          return
+        }
+
         table(data, [
           "SYMBOL",
           "POSITION_AMOUNT",
@@ -44,7 +65,18 @@ if (b_init(env)) {
     });
 
   program
-    .command("b_orders")
+    .command("deposit_history")
+    .description("Binance Deposit History")
+    .alias("dh")
+    .action(() => {
+      const deposit_history = binance_deposit_history(binance);
+
+      table(deposit_history);
+    });
+
+  program
+    .command("orders")
+    .alias("o")
     .description("Binance Orders")
     .action(() => {
       const orders = binance_orders(binance);
@@ -55,7 +87,8 @@ if (b_init(env)) {
     });
 
   program
-    .command("b_balance")
+    .command("balance")
+    .alias("b")
     .description("Binance Balance")
     .action(() => {
       const balance = binance_balance(binance);
